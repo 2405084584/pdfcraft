@@ -35,6 +35,10 @@ This project is built with modern web technologies to provide a slick, app-like 
 - **🎨 Modern UI**: Clean, accessible, and responsive design built with Tailwind CSS.
 - **🌐 Multi-language**: Supports English, Spanish, French, German, Portuguese, Japanese, Korean, and Chinese.
 
+### Rotating PDFs
+
+Standard right-angle rotations preserve the original document's editable form fields, bookmarks, internal page links, custom page labels, attachments, and title/author metadata. This applies to all-page and selected-page rotations, including pages that already have a rotation. Arbitrary-angle rotation continues to rebuild page content through embedding and does not provide the same preservation guarantees.
+
 ## 🔄 Workflow Editor (Beta)
 
 > ⚠️ **Early Development Notice**: This feature is currently in early development stage. You may encounter bugs or incomplete functionality. We appreciate your feedback and patience!
