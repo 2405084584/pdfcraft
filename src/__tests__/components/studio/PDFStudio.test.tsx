@@ -833,6 +833,158 @@ describe('PDFStudio Component', () => {
       }).not.toThrow();
     });
   });
+
+  describe('PDF Viewer Iframe Keystroke Relay Bridge & Focus Resilience', () => {
+    beforeEach(() => {
+      vi.spyOn(window, 'confirm').mockImplementation(() => true);
+    });
+
+    const setupThreeDocs = () => {
+      const file1 = createDummyPdfFile('doc1.pdf');
+      const file2 = createDummyPdfFile('doc2.pdf');
+      const file3 = createDummyPdfFile('doc3.pdf');
+      render(<PDFStudio locale="en" />);
+      const uploadInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      fireEvent.change(uploadInput, {
+        target: { files: [file1, file2, file3] },
+      });
+      expect(screen.getByTitle('doc1.pdf')).toBeInTheDocument();
+      return { file1, file2, file3 };
+    };
+
+    it('relays tab navigation shortcuts originating from iframe contentWindow or document to parent Studio', () => {
+      setupThreeDocs();
+
+      const iframe = screen.getByTitle('doc1.pdf') as HTMLIFrameElement;
+      expect(iframe).toBeInTheDocument();
+      expect(iframe.contentWindow).toBeTruthy();
+
+      // Trigger keydown on iframe.contentWindow (e.g. user focused inside PDF viewer)
+      fireEvent.keyDown(iframe.contentWindow!, { key: 'PageDown', code: 'PageDown', ctrlKey: true });
+      expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+
+      // Trigger keydown on new active document's iframe.contentDocument
+      const iframe2 = screen.getByTitle('doc2.pdf') as HTMLIFrameElement;
+      fireEvent.keyDown(iframe2.contentDocument!, { key: 'PageDown', code: 'PageDown', ctrlKey: true });
+      expect(screen.getByTitle('doc3.pdf')).toBeInTheDocument();
+
+      // Backward navigation via Ctrl+PageUp from iframe contentWindow
+      const iframe3 = screen.getByTitle('doc3.pdf') as HTMLIFrameElement;
+      fireEvent.keyDown(iframe3.contentWindow!, { key: 'PageUp', code: 'PageUp', ctrlKey: true });
+      expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+    });
+
+    it('relays tab closure shortcuts originating from iframe contentWindow or document to parent Studio', () => {
+      vi.spyOn(tauriBridge, 'isTauri').mockReturnValue(true);
+      setupThreeDocs();
+
+      const iframe1 = screen.getByTitle('doc1.pdf') as HTMLIFrameElement;
+
+      // Close active doc1 with Ctrl+F4 from iframe.contentWindow
+      fireEvent.keyDown(iframe1.contentWindow!, { key: 'F4', code: 'F4', ctrlKey: true });
+      expect(screen.queryByTitle('doc1.pdf')).not.toBeInTheDocument();
+      expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+
+      // Close active doc2 with Ctrl+W in Tauri from iframe.contentWindow
+      const iframe2 = screen.getByTitle('doc2.pdf') as HTMLIFrameElement;
+      fireEvent.keyDown(iframe2.contentWindow!, { key: 'w', code: 'KeyW', ctrlKey: true });
+      expect(screen.queryByTitle('doc2.pdf')).not.toBeInTheDocument();
+      expect(screen.getByTitle('doc3.pdf')).toBeInTheDocument();
+    });
+
+    it('cleans up iframe event listener on unmount and active document change without memory leak', () => {
+      const file = createDummyPdfFile('test-clean.pdf');
+      const { unmount } = render(<PDFStudio locale="en" initialFile={file} />);
+
+      const iframe = screen.getByTitle('test-clean.pdf') as HTMLIFrameElement;
+      expect(iframe.contentWindow).toBeTruthy();
+
+      const removeEventListenerSpy = vi.spyOn(iframe.contentWindow!, 'removeEventListener');
+
+      // Unmount the component
+      unmount();
+
+      // The keydown listener on iframe contentWindow should have been cleaned up
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+    });
+
+    it('cleans up previous listener when iframe reloads or onLoad fires repeatedly', () => {
+      const file = createDummyPdfFile('test-reload.pdf');
+      render(<PDFStudio locale="en" initialFile={file} />);
+
+      const iframe = screen.getByTitle('test-reload.pdf') as HTMLIFrameElement;
+      const removeSpy = vi.spyOn(iframe.contentWindow!, 'removeEventListener');
+      const addSpy = vi.spyOn(iframe.contentWindow!, 'addEventListener');
+
+      // Trigger iframe load event (simulating iframe reload)
+      fireEvent.load(iframe);
+
+      // Verify remove was called before adding new listener, preventing listener accumulation
+      expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+    });
+
+    it('executes modifier tab hotkeys (Ctrl+Tab, Ctrl+PageDown, Ctrl+F4, Ctrl+W) when an input element has focus', () => {
+      vi.spyOn(tauriBridge, 'isTauri').mockReturnValue(true);
+      setupThreeDocs();
+
+      const searchInput = screen.getByTestId('studio-tool-search');
+      searchInput.focus();
+      expect(document.activeElement).toBe(searchInput);
+
+      // Forward with Ctrl+Tab while input is focused
+      fireEvent.keyDown(searchInput, { key: 'Tab', code: 'Tab', ctrlKey: true });
+      expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+
+      // Forward with Ctrl+PageDown while input is focused
+      fireEvent.keyDown(searchInput, { key: 'PageDown', code: 'PageDown', ctrlKey: true });
+      expect(screen.getByTitle('doc3.pdf')).toBeInTheDocument();
+
+      // Close doc3 with Ctrl+W while input is focused
+      fireEvent.keyDown(searchInput, { key: 'w', code: 'KeyW', ctrlKey: true });
+      expect(screen.queryByTitle('doc3.pdf')).not.toBeInTheDocument();
+      expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+
+      // Close doc2 with Ctrl+F4 while input is focused
+      fireEvent.keyDown(searchInput, { key: 'F4', code: 'F4', ctrlKey: true });
+      expect(screen.queryByTitle('doc2.pdf')).not.toBeInTheDocument();
+      expect(screen.getByTitle('doc1.pdf')).toBeInTheDocument();
+    });
+
+    it('executes modifier tab hotkeys (Ctrl+Tab, Ctrl+PageDown, Ctrl+F4, Ctrl+W) when a textarea element has focus', () => {
+      vi.spyOn(tauriBridge, 'isTauri').mockReturnValue(true);
+      setupThreeDocs();
+
+      const textarea = document.createElement('textarea');
+      textarea.setAttribute('data-testid', 'test-custom-textarea');
+      document.body.appendChild(textarea);
+      textarea.focus();
+      expect(document.activeElement).toBe(textarea);
+
+      try {
+        // Forward with Ctrl+Tab while textarea is focused
+        fireEvent.keyDown(textarea, { key: 'Tab', code: 'Tab', ctrlKey: true });
+        expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+
+        // Forward with Ctrl+PageDown while textarea is focused
+        fireEvent.keyDown(textarea, { key: 'PageDown', code: 'PageDown', ctrlKey: true });
+        expect(screen.getByTitle('doc3.pdf')).toBeInTheDocument();
+
+        // Close doc3 with Ctrl+W while textarea is focused
+        fireEvent.keyDown(textarea, { key: 'w', code: 'KeyW', ctrlKey: true });
+        expect(screen.queryByTitle('doc3.pdf')).not.toBeInTheDocument();
+        expect(screen.getByTitle('doc2.pdf')).toBeInTheDocument();
+
+        // Close doc2 with Ctrl+F4 while textarea is focused
+        fireEvent.keyDown(textarea, { key: 'F4', code: 'F4', ctrlKey: true });
+        expect(screen.queryByTitle('doc2.pdf')).not.toBeInTheDocument();
+        expect(screen.getByTitle('doc1.pdf')).toBeInTheDocument();
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    });
+  });
 });
+
 
 
