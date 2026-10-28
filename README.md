@@ -35,6 +35,10 @@ This project is built with modern web technologies to provide a slick, app-like 
 - **🎨 Modern UI**: Clean, accessible, and responsive design built with Tailwind CSS.
 - **🌐 Multi-language**: Supports English, Spanish, French, German, Portuguese, Japanese, Korean, and Chinese.
 
+### Editing bookmark destinations
+
+Editing titles or reorganizing existing local page bookmarks preserves their original position, zoom and fit mode, including named destinations. Changing a bookmark's target page explicitly resets its view to the top of the new page. New bookmarks retain the existing page-top default.
+
 ## 🔄 Workflow Editor (Beta)
 
 > ⚠️ **Early Development Notice**: This feature is currently in early development stage. You may encounter bugs or incomplete functionality. We appreciate your feedback and patience!
