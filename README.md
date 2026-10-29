@@ -38,6 +38,9 @@ This project is built with modern web technologies to provide a slick, app-like 
 ### Rotating PDFs
 
 Standard right-angle rotations preserve the original document's editable form fields, bookmarks, internal page links, custom page labels, attachments, and title/author metadata. This applies to all-page and selected-page rotations, including pages that already have a rotation. Arbitrary-angle rotation continues to rebuild page content through embedding and does not provide the same preservation guarantees.
+### Editing bookmark destinations
+
+Editing titles or reorganizing existing local page bookmarks preserves their original position, zoom and fit mode, including named destinations. Changing a bookmark's target page explicitly resets its view to the top of the new page. New bookmarks retain the existing page-top default.
 ### Editing metadata
 
 Metadata edits preserve fields that were not selected for an update. Disabling automatic modification-date updates retains the existing date; explicitly supplied dates and producer information still take precedence.
