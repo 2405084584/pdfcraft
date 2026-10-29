@@ -13,6 +13,7 @@
 
 <div align="center">
 
+[![LibrePDF Desktop](https://img.shields.io/badge/Desktop_App-LibrePDF-2563eb?style=flat-square&logo=github)](https://github.com/PDFCraftTool/LibrePDF)
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fpdfcraft.devtoolcafe.com%2Fen%2F)](https://pdfcraft.devtoolcafe.com/en/)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
@@ -20,6 +21,14 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square&logo=tailwindcss)
 
 </div>
+
+> [!TIP]
+> ### 🚀 Discover LibrePDF — Private Desktop PDF Suite
+> Looking for a cross-platform desktop application with zero network telemetry? Check out our sister project:  
+> **[PDFCraftTool/LibrePDF](https://github.com/PDFCraftTool/LibrePDF)**: Open-source, zero-telemetry desktop PDF suite with 53+ tools, direct in-place text editing, offline Ollama AI Copilot, and node-based DAG workflows. A private, subscription-free Acrobat & Stirling-PDF desktop alternative.
+> 
+> * 🔗 **Project Repository**: [https://github.com/PDFCraftTool/LibrePDF](https://github.com/PDFCraftTool/LibrePDF)
+> * ⚖️ **Open-Source License**: [Apache-2.0 License](https://github.com/PDFCraftTool/LibrePDF/blob/main/LICENSE)
 
 ## 📖 About
 
