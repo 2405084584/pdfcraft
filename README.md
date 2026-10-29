@@ -35,6 +35,9 @@ This project is built with modern web technologies to provide a slick, app-like 
 - **🎨 Modern UI**: Clean, accessible, and responsive design built with Tailwind CSS.
 - **🌐 Multi-language**: Supports English, Spanish, French, German, Portuguese, Japanese, Korean, and Chinese.
 
+### Editing bookmark destinations
+
+Editing titles or reorganizing existing local page bookmarks preserves their original position, zoom and fit mode, including named destinations. Changing a bookmark's target page explicitly resets its view to the top of the new page. New bookmarks retain the existing page-top default.
 ### Editing metadata
 
 Metadata edits preserve fields that were not selected for an update. Disabling automatic modification-date updates retains the existing date; explicitly supplied dates and producer information still take precedence.
