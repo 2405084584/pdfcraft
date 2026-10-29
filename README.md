@@ -35,6 +35,10 @@ This project is built with modern web technologies to provide a slick, app-like 
 - **🎨 Modern UI**: Clean, accessible, and responsive design built with Tailwind CSS.
 - **🌐 Multi-language**: Supports English, Spanish, French, German, Portuguese, Japanese, Korean, and Chinese.
 
+### PDF ZIP archives
+
+The PDFs to ZIP tool keeps every selected document, including files with the same name from different folders. Duplicate names receive a numeric suffix before the extension (for example, `report.pdf` and `report (2).pdf`). Existing input names are reserved, so an original `report (2).pdf` is not overwritten by an automatically renamed file. PDF contents are not modified.
+
 ## 🔄 Workflow Editor (Beta)
 
 > ⚠️ **Early Development Notice**: This feature is currently in early development stage. You may encounter bugs or incomplete functionality. We appreciate your feedback and patience!
